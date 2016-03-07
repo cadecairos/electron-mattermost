@@ -83,26 +83,26 @@ app.on('before-quit', function() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', function() {
-  if (process.platform === 'win32') {
-    // set up tray icon to show balloon
-    trayIcon = new Tray(path.resolve(__dirname, 'resources/tray.png'));
-    trayIcon.setToolTip(app.getName());
-    var tray_menu = require('./main/menus/tray').createDefault();
-    trayIcon.setContextMenu(tray_menu);
-    trayIcon.on('click', function() {
-      mainWindow.focus();
+  // set up tray icon to show balloon
+  trayIcon = new Tray(path.resolve(__dirname, 'resources/tray.png'));
+  trayIcon.setToolTip(app.getName());
+  var tray_menu = require('./main/menus/tray').createDefault();
+  trayIcon.setContextMenu(tray_menu);
+  trayIcon.on('click', function() {
+    mainWindow.focus();
+  });
+  trayIcon.on('balloon-click', function() {
+    mainWindow.focus();
+  });
+  ipc.on('notified', function(event, arg) {
+    trayIcon.displayBalloon({
+      icon: path.resolve(__dirname, 'resources/appicon.png'),
+      title: arg.title,
+      content: arg.options.body
     });
-    trayIcon.on('balloon-click', function() {
-      mainWindow.focus();
-    });
-    ipc.on('notified', function(event, arg) {
-      trayIcon.displayBalloon({
-        icon: path.resolve(__dirname, 'resources/appicon.png'),
-        title: arg.title,
-        content: arg.options.body
-      });
-    });
+  });
 
+  if (process.platform === 'win32') {
     // Set overlay icon from dataURL
     // Set trayicon to show "dot"
     ipc.on('win32-overlay', function(event, arg) {
